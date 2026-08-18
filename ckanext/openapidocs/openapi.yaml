@@ -1,0 +1,297 @@
+# Base configuration for ckanext-openapidocs (openapi.yaml).
+#
+# This layer applies to any CKAN instance. Projects override it by pointing
+# `ckanext.openapidocs.spec_files` at their own YAML file, and individual
+# deployments override that with `ckanext.openapidocs.*` config options (which
+# can be set from the environment). Later layers win; mappings merge key by
+# key, while lists are replaced outright.
+#
+# WHICH ACTIONS APPEAR
+#
+# Every action registered in the running instance is documented by default.
+# Two top-level keys change that, and both accept exact names or globs
+# (`*_patch`, `follow_*`):
+#
+#   exclude       - list of actions to leave out of the docs
+#   include_only  - when set, document only actions matching this list
+#
+# `exclude` wins over `include_only`, so a family can be allowed broadly and
+# individual members dropped. An action can also be hidden on its own with
+# `hidden: true` in its entry. Listing an action the running instance does not
+# have is harmless: it is ignored rather than published as a path that 404s.
+#
+# To drop a whole CKAN feature, match on the word rather than a prefix: its
+# actions rarely share one. Following, for instance, spans `follow_dataset`,
+# `unfollow_user`, `am_following_dataset`, `user_follower_count` and
+# `organization_followee_list`, so `"*follow*"` is what removes it — a
+# `follow_*` glob catches only two of the twenty. Quote any pattern starting
+# with `*`, or YAML reads it as an alias.
+#
+# DISPLAY ORDER
+#
+#   tag_order  - the order tags appear on the page
+#   order      - the order actions appear within their tag; exact names or
+#                globs, matched in the order written
+#
+# Anything `order` does not name follows its tag's listed actions, reads (GET)
+# before writes (POST), then alphabetically.
+#
+# PER-ACTION KEYS
+#
+#   summary              - replaces the generated summary
+#   description          - replaces the generated description entirely
+#   prepend_description  - prepended to the generated description
+#   properties           - merged into the request body properties (and GET
+#                          query parameters for read-only actions)
+#   required             - list of required request properties
+#   tags                 - replaces the generated tag
+#   sysadmin: true       - marks the action as sysadmin-only
+#   hidden: true         - leaves the action out of the docs
+#
+# Give a property an `example` value rather than adding a top-level request
+# example: Swagger UI prints a top-level example verbatim and hides every
+# field it leaves out, while per-property examples let it build a sample
+# payload covering all documented fields.
+
+info:
+  title: CKAN Action API
+  version: "3"
+  description: |
+    Every action is called at `/api/3/action/{action_name}`. Reads are listed
+    as `GET` and accept `POST` with a JSON body too; writes require `POST`.
+
+    Authenticate with an API token in the `Authorization` header — no `Bearer`
+    prefix. Use **Authorize** to try calls from this page.
+
+tags:
+  Datasets: Create, read, update and search datasets (packages).
+  Resources: Files and data attached to datasets.
+  Organizations: Organizations that own datasets.
+  Groups: Groups and their membership.
+  Tags & Vocabularies: Free tags and controlled vocabularies.
+  Users & Authentication: User accounts, API tokens and following.
+  Activity: Activity streams for datasets, users, groups and organizations.
+  Administration: Maintenance actions, mostly sysadmin-only.
+
+# The order tags appear on the page. Tags left out keep their built-in
+# position, after the ones named here.
+tag_order:
+  - Datasets
+  - Resources
+  - Organizations
+  - Groups
+  - Tags & Vocabularies
+  - Users & Authentication
+  - Activity
+  - Administration
+
+# The order actions appear *within* their tag. Entries may be exact names or
+# globs, and are matched in the order written, so put the actions people reach
+# for most at the top of each group. Anything not named here follows its tag's
+# listed actions, reads (GET) before writes (POST), then alphabetically.
+order:
+  # Datasets — look up and search before creating.
+  - package_search
+  - package_show
+  - package_list
+  - current_package_list_with_resources
+  - package_autocomplete
+  - package_create
+  - package_update
+  - package_patch
+  - package_delete
+  # Resources
+  - resource_show
+  - resource_search
+  - resource_create
+  - resource_update
+  - resource_patch
+  - resource_delete
+  - resource_view_*
+  # Organizations
+  - organization_list
+  - organization_show
+  - organization_list_for_user
+  - organization_autocomplete
+  - organization_create
+  - organization_update
+  - organization_patch
+  - organization_delete
+  - organization_member_*
+  # Groups
+  - group_list
+  - group_show
+  - group_list_authz
+  - group_package_show
+  - group_create
+  - group_update
+  - group_patch
+  - group_delete
+  - member_*
+  # Tags and vocabularies
+  - tag_list
+  - tag_show
+  - tag_create
+  - tag_delete
+  - vocabulary_list
+  - vocabulary_show
+  - vocabulary_create
+  - vocabulary_update
+  - vocabulary_delete
+  # Users, tokens and authentication
+  - user_show
+  - user_list
+  - user_autocomplete
+  - user_create
+  - user_update
+  - user_patch
+  - user_delete
+  - api_token_list
+  - api_token_create
+  - api_token_revoke
+  # Activity
+  - package_activity_list
+  - user_activity_list
+  - organization_activity_list
+  - group_activity_list
+  - dashboard_activity_list
+  - activity_show
+  - activity_diff
+
+# Internal machinery that API clients have no reason to call. A project can
+# replace this list wholesale, or clear it with `ckanext.openapidocs.exclude =`
+# to publish everything.
+exclude:
+  # Background job and task bookkeeping, driven by CKAN itself.
+  - job_*
+  - task_status_*
+  # Site configuration, managed through the sysadmin UI.
+  - config_option_*
+  # Translation tables, managed through the sysadmin UI.
+  - term_translation_*
+  # Internal helpers with no meaning over HTTP.
+  - get_site_user
+  - send_email_notifications
+  - dashboard_mark_activities_old
+
+actions:
+  package_create:
+    properties:
+      name:
+        type: string
+        example: my-dataset
+      title:
+        type: string
+        example: My Dataset
+      owner_org:
+        type: string
+        example: my-organization
+      notes:
+        type: string
+        example: A short description of the dataset.
+      license_id:
+        type: string
+        example: cc-by
+      private:
+        type: boolean
+        example: false
+      url:
+        type: string
+        example: https://example.com/dataset
+      version:
+        type: string
+        example: "1.0"
+      author:
+        type: string
+        example: Data Team
+      author_email:
+        type: string
+        example: data@example.com
+      maintainer:
+        type: string
+        example: Data Team
+      maintainer_email:
+        type: string
+        example: data@example.com
+      tags:
+        type: array
+        example:
+          - name: energy
+      tag_string:
+        type: string
+        example: energy,production
+        description: >
+          Tags as a comma-separated string, as an alternative to the `tags`
+          list. Available when the instance uses ckanext-scheming.
+      extras:
+        type: array
+        example:
+          - key: internal_reference
+            value: REF-001
+
+  resource_create:
+    required: [package_id]
+    properties:
+      package_id:
+        type: string
+        example: my-dataset
+      url:
+        type: string
+        example: https://example.com/data.csv
+      name:
+        type: string
+        example: Data file
+      description:
+        type: string
+        example: A short description of this file.
+      format:
+        type: string
+        example: CSV
+      mimetype:
+        type: string
+        example: text/csv
+      size:
+        type: integer
+        example: 20480
+
+  organization_create:
+    properties:
+      name:
+        type: string
+        example: my-organization
+      title:
+        type: string
+        example: My Organization
+      description:
+        type: string
+        example: What this organization publishes.
+      image_url:
+        type: string
+        example: https://example.com/logo.png
+
+  group_create:
+    properties:
+      name:
+        type: string
+        example: my-group
+      title:
+        type: string
+        example: My Group
+      description:
+        type: string
+        example: What this group collects.
+
+  package_show:
+    properties:
+      id:
+        type: string
+        example: my-dataset
+
+  package_search:
+    properties:
+      q:
+        type: string
+        example: "*:*"
+      rows:
+        type: integer
+        example: 20

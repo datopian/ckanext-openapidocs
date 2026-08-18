@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title }}</title>
+  <link rel="stylesheet" href="{{ h.url_for_static('/vendor/swagger-ui/swagger-ui.css') }}">
+  <link rel="stylesheet" href="{{ h.url_for_static('/vendor/openapidocs/theme.css') }}">
+  {% if primary_color or header_color %}
+  {# The stylesheet derives its accents from these properties. Both values are
+     validated as CSS colours before reaching here. #}
+  <style>
+    :root {
+      {% if primary_color %}--openapidocs-primary: {{ primary_color }};{% endif %}
+      {% if header_color %}--openapidocs-header-bg: {{ header_color }};{% endif %}
+    }
+  </style>
+  {% endif %}
+</head>
+<body>
+  <header class="openapidocs-header">
+    <div class="openapidocs-header-inner">
+      {% if logo_url %}
+      <img class="openapidocs-logo" src="{{ logo_url }}" alt="">
+      {% endif %}
+      <div class="openapidocs-header-text">
+        <h1 class="openapidocs-header-title">{{ site_title }}</h1>
+        {% if api_version %}
+        <span class="openapidocs-header-version">v{{ api_version }}</span>
+        {% endif %}
+      </div>
+      <a class="openapidocs-header-link" href="{{ spec_url }}">
+        OpenAPI spec
+      </a>
+    </div>
+  </header>
+
+  <div id="swagger-ui"></div>
+
+  <script src="{{ h.url_for_static('/vendor/swagger-ui/swagger-ui-bundle.js') }}"></script>
+  <script>
+    window.ui = SwaggerUIBundle({
+      url: {{ spec_url | tojson }},
+      dom_id: "#swagger-ui",
+      deepLinking: true,
+      docExpansion: "none",
+      defaultModelsExpandDepth: -1,
+      defaultModelRendering: "example",
+      persistAuthorization: true,
+      tryItOutEnabled: true,
+      syntaxHighlight: { theme: "nord" }
+    });
+  </script>
+</body>
+</html>

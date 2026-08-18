@@ -1,0 +1,522 @@
+/* Styling for the generated API docs page.
+ *
+ * Everything is driven by the custom properties below, so a portal can set its
+ * brand colour through `ckanext.openapidocs.primary_color` (the page writes it
+ * into `--openapidocs-primary`) without shipping its own CSS. Swagger UI's own
+ * stylesheet loads first; these rules override it.
+ */
+:root {
+  /* Light theme only: tells the browser not to auto-darken form controls,
+     scrollbars and inputs for visitors whose OS is set to dark mode. */
+  color-scheme: light;
+
+  /* Brand colour, set from `ckanext.openapidocs.primary_color`. It drives
+     links, inline code and the Authorize/Execute buttons. */
+  --openapidocs-primary: #3b4a5a;
+  --openapidocs-primary-dark: color-mix(in srgb, var(--openapidocs-primary) 82%, black);
+  --openapidocs-primary-tint: color-mix(in srgb, var(--openapidocs-primary) 8%, white);
+  --openapidocs-on-primary: #ffffff;
+
+  /* The header carries the brand colour. Set `header_color` to decouple it
+     from the accents. */
+  --openapidocs-header-bg: var(--openapidocs-primary);
+  --openapidocs-header-fg: var(--openapidocs-on-primary);
+
+  /* HTTP method colours. GET takes the brand colour since most actions are
+     reads; the others are distinct from it so a verb is still readable at a
+     glance. Each is its own property, so a brand colour close to one of them
+     can be overridden without touching the rest. */
+  --openapidocs-get: var(--openapidocs-primary);
+  --openapidocs-post: #0f766e;
+  --openapidocs-delete: #b3261e;
+  --openapidocs-put: #a16207;
+
+  --openapidocs-text: #1a1a1a;
+  --openapidocs-muted: #6b7280;
+  --openapidocs-border: #e5e7eb;
+  --openapidocs-surface: #ffffff;
+  --openapidocs-canvas: #f7f8fa;
+
+  --openapidocs-radius: 10px;
+  --openapidocs-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+  --openapidocs-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+}
+
+body {
+  margin: 0;
+  background: var(--openapidocs-canvas);
+  font-family: var(--openapidocs-font);
+}
+
+/* Swagger UI ships its own header; the page supplies a branded one instead. */
+.swagger-ui .topbar {
+  display: none;
+}
+
+/* ---------- Page header ---------- */
+
+.openapidocs-header {
+  background: var(--openapidocs-header-bg);
+  color: var(--openapidocs-header-fg);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
+}
+
+/* Matches the width Swagger UI gives its own content, so the header title
+   lines up with the operations below it. */
+.openapidocs-header-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 20px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.openapidocs-logo {
+  height: 34px;
+  width: auto;
+  display: block;
+  flex: none;
+}
+
+.openapidocs-header-text {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.openapidocs-header-title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.openapidocs-header-version {
+  flex: none;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 18%);
+}
+
+.openapidocs-header-link {
+  margin-left: auto;
+  flex: none;
+  color: var(--openapidocs-header-fg);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 7px 14px;
+  border: 1px solid rgb(255 255 255 / 40%);
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.openapidocs-header-link:hover,
+.openapidocs-header-link:focus-visible {
+  background: rgb(255 255 255 / 16%);
+}
+
+@media (max-width: 620px) {
+  .openapidocs-header-inner {
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  .openapidocs-header-title {
+    font-size: 1.05rem;
+  }
+
+  /* The spec link is a convenience, not a necessity; drop it when narrow. */
+  .openapidocs-header-link {
+    display: none;
+  }
+}
+
+/* ---------- Layout ---------- */
+
+.swagger-ui {
+  font-family: var(--openapidocs-font);
+  color: var(--openapidocs-text);
+}
+
+.swagger-ui .wrapper {
+  max-width: 1180px;
+}
+
+.swagger-ui .info {
+  margin: 28px 0 18px;
+  padding: 26px 28px;
+  background: var(--openapidocs-surface);
+  border: 1px solid var(--openapidocs-border);
+  border-radius: var(--openapidocs-radius);
+}
+
+/* The page header already shows the title and version, so Swagger UI's own
+   heading (and the servers/scheme row it sits next to) would just repeat it. */
+.swagger-ui .info .main,
+.swagger-ui .info hgroup.main,
+.swagger-ui .scheme-container .schemes > .servers,
+.swagger-ui .scheme-container .schemes-server-container {
+  display: none;
+}
+
+/* Keeps the Authorize button without the empty bar it normally sits in. */
+.swagger-ui .scheme-container {
+  background: transparent;
+  box-shadow: none;
+  margin: 0;
+  padding: 0 0 6px;
+}
+
+.swagger-ui .info .markdown p,
+.swagger-ui .info li {
+  color: var(--openapidocs-muted);
+  line-height: 1.65;
+}
+
+.swagger-ui .info h3 {
+  margin-top: 22px;
+  font-size: 1.05rem;
+  color: var(--openapidocs-text);
+}
+
+.swagger-ui .info a {
+  color: var(--openapidocs-primary);
+}
+
+/* ---------- Tag sections ---------- */
+
+.swagger-ui .opblock-tag {
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--openapidocs-border);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--openapidocs-text);
+}
+
+.swagger-ui .opblock-tag:hover {
+  background: transparent;
+}
+
+.swagger-ui .opblock-tag small {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--openapidocs-muted);
+  padding-left: 12px;
+}
+
+/* ---------- Operations ---------- */
+
+.swagger-ui .opblock {
+  margin: 0 0 10px;
+  border: 1px solid var(--openapidocs-border);
+  border-radius: var(--openapidocs-radius);
+  box-shadow: none;
+  background: var(--openapidocs-surface);
+}
+
+.swagger-ui .opblock:hover {
+  border-color: color-mix(in srgb, var(--openapidocs-primary) 40%, var(--openapidocs-border));
+}
+
+.swagger-ui .opblock .opblock-summary {
+  border-bottom: none;
+  padding: 6px 10px;
+}
+
+.swagger-ui .opblock .opblock-summary-method {
+  min-width: 74px;
+  border-radius: 6px;
+  font-family: var(--openapidocs-font);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.swagger-ui .opblock .opblock-summary-path {
+  font-family: var(--openapidocs-mono);
+  font-size: 0.875rem;
+  color: var(--openapidocs-text);
+}
+
+.swagger-ui .opblock .opblock-summary-description {
+  font-size: 0.85rem;
+  color: var(--openapidocs-muted);
+}
+
+/* Every operation card is the same neutral surface; only the method badge
+   carries colour, so a long list stays calm and the verb still stands out. */
+.swagger-ui .opblock.opblock-get,
+.swagger-ui .opblock.opblock-post,
+.swagger-ui .opblock.opblock-put,
+.swagger-ui .opblock.opblock-patch,
+.swagger-ui .opblock.opblock-delete {
+  background: var(--openapidocs-surface);
+  border-color: var(--openapidocs-border);
+}
+
+.swagger-ui .opblock .opblock-summary {
+  border-color: transparent;
+}
+
+.swagger-ui .opblock.opblock-get .opblock-summary-method {
+  background: var(--openapidocs-get);
+}
+
+.swagger-ui .opblock.opblock-post .opblock-summary-method {
+  background: var(--openapidocs-post);
+}
+
+.swagger-ui .opblock.opblock-put .opblock-summary-method,
+.swagger-ui .opblock.opblock-patch .opblock-summary-method {
+  background: var(--openapidocs-put);
+}
+
+.swagger-ui .opblock.opblock-delete .opblock-summary-method {
+  background: var(--openapidocs-delete);
+}
+
+/* ---------- Buttons and controls ---------- */
+
+.swagger-ui .btn {
+  border-radius: 8px;
+  box-shadow: none;
+  font-family: var(--openapidocs-font);
+  font-weight: 550;
+}
+
+.swagger-ui .btn.execute {
+  background: var(--openapidocs-primary);
+  border-color: var(--openapidocs-primary);
+  color: var(--openapidocs-on-primary);
+}
+
+.swagger-ui .btn.execute:hover {
+  background: var(--openapidocs-primary-dark);
+  border-color: var(--openapidocs-primary-dark);
+}
+
+.swagger-ui .btn.authorize {
+  color: var(--openapidocs-primary);
+  border-color: var(--openapidocs-primary);
+}
+
+.swagger-ui .btn.authorize svg {
+  fill: var(--openapidocs-primary);
+}
+
+.swagger-ui .btn.authorize:hover {
+  background: var(--openapidocs-primary-tint);
+}
+
+.swagger-ui .filter .operation-filter-input {
+  border: 1px solid var(--openapidocs-border);
+  border-radius: 8px;
+  padding: 9px 12px;
+}
+
+.swagger-ui .filter .operation-filter-input:focus-visible {
+  outline: 2px solid var(--openapidocs-primary);
+  outline-offset: 1px;
+}
+
+/* ---------- Authorize dialog ---------- */
+
+.swagger-ui .dialog-ux .modal-ux {
+  border: none;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 22%);
+  max-width: 520px;
+}
+
+.swagger-ui .dialog-ux .modal-ux-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--openapidocs-border);
+}
+
+.swagger-ui .dialog-ux .modal-ux-header h3 {
+  font-family: var(--openapidocs-font);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--openapidocs-text);
+}
+
+.swagger-ui .dialog-ux .modal-ux-content {
+  padding: 20px 22px 22px;
+  max-height: 70vh;
+}
+
+/* Swagger UI heads each scheme with its raw key and type — "ApiToken
+   (apiKey)" — which is implementation detail, not something to read. The
+   description below it already says what to paste. */
+.swagger-ui .auth-container h4 {
+  display: none;
+}
+
+/* Swagger UI then renders the scheme's `name` and `in` as two bare
+   `<p>Name: <code>…</code></p>` rows (the `in` value comes out empty, leaving
+   a stray "In:" label), which the description already covers.
+
+   These are the only bare `<p>` elements in the form: the description is
+   rendered as markdown into a `.renderedMarkdown`/`.markdown` wrapper, and
+   the rules below restore that one explicitly. Matching on structure rather
+   than on the label text keeps this working in other locales. */
+.swagger-ui .auth-container form p {
+  display: none;
+}
+
+.swagger-ui .auth-container form .markdown p,
+.swagger-ui .auth-container form .renderedMarkdown p {
+  display: block;
+}
+
+.swagger-ui .auth-container {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.swagger-ui .auth-container .wrapper {
+  margin: 0;
+  padding: 0;
+}
+
+.swagger-ui .auth-container label {
+  font-family: var(--openapidocs-font);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--openapidocs-text);
+  margin-bottom: 6px;
+}
+
+.swagger-ui .auth-container .markdown p,
+.swagger-ui .auth-container .renderedMarkdown p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--openapidocs-muted);
+  margin: 0 0 16px;
+}
+
+.swagger-ui .auth-container input[type="text"],
+.swagger-ui .auth-container input[type="password"] {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 40px;
+  padding: 9px 12px;
+  font-family: var(--openapidocs-mono);
+  font-size: 0.875rem;
+  border: 1px solid var(--openapidocs-border);
+  border-radius: 8px;
+  margin: 0;
+}
+
+.swagger-ui .auth-container input[type="text"]:focus,
+.swagger-ui .auth-container input[type="password"]:focus {
+  outline: 2px solid var(--openapidocs-primary);
+  outline-offset: 0;
+  border-color: var(--openapidocs-primary);
+}
+
+.swagger-ui .auth-btn-wrapper {
+  padding: 18px 0 0;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.swagger-ui .auth-btn-wrapper .btn {
+  min-width: 96px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.swagger-ui .auth-btn-wrapper .btn.modal-btn.auth.authorize {
+  background: var(--openapidocs-primary);
+  border-color: var(--openapidocs-primary);
+  color: var(--openapidocs-on-primary);
+}
+
+.swagger-ui .auth-btn-wrapper .btn.modal-btn.auth.authorize:hover {
+  background: var(--openapidocs-primary-dark);
+  border-color: var(--openapidocs-primary-dark);
+}
+
+.swagger-ui .auth-btn-wrapper .btn.modal-btn.auth.btn-done {
+  background: transparent;
+  border-color: var(--openapidocs-border);
+  color: var(--openapidocs-muted);
+}
+
+.swagger-ui .auth-btn-wrapper .btn.modal-btn.auth.btn-done:hover {
+  background: var(--openapidocs-canvas);
+  color: var(--openapidocs-text);
+}
+
+/* ---------- Tables, code and schemas ---------- */
+
+.swagger-ui .parameter__name {
+  font-family: var(--openapidocs-font);
+  font-weight: 600;
+  color: var(--openapidocs-text);
+}
+
+.swagger-ui .parameter__type,
+.swagger-ui .prop-type {
+  font-family: var(--openapidocs-mono);
+  font-size: 0.78rem;
+  color: var(--openapidocs-primary);
+}
+
+.swagger-ui .parameter__in {
+  font-family: var(--openapidocs-mono);
+  font-size: 0.72rem;
+  color: var(--openapidocs-muted);
+}
+
+.swagger-ui .markdown code,
+.swagger-ui .renderedMarkdown code {
+  font-family: var(--openapidocs-mono);
+  font-size: 0.82em;
+  background: var(--openapidocs-primary-tint);
+  color: var(--openapidocs-primary-dark);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.swagger-ui .responses-inner,
+.swagger-ui .opblock-body {
+  background: var(--openapidocs-surface);
+}
+
+.swagger-ui table thead tr th {
+  border-bottom: 1px solid var(--openapidocs-border);
+  color: var(--openapidocs-muted);
+  font-family: var(--openapidocs-font);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.swagger-ui .model-title,
+.swagger-ui .model {
+  font-family: var(--openapidocs-mono);
+}
+
+/* Long request/response samples scroll rather than stretching the page. */
+.swagger-ui .highlight-code > .microlight,
+.swagger-ui .model-example pre {
+  max-height: 480px;
+  overflow: auto;
+}
+

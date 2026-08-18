@@ -1,0 +1,35 @@
+[project]
+name = "ckanext-openapidocs"
+version = "0.1.0"
+description = "Generated OpenAPI 3 spec and Swagger UI for any CKAN instance"
+readme = "README.md"
+authors = [
+    {name = "Datopian"}
+]
+license = {text = "AGPL"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.12",
+]
+
+keywords = [ "CKAN", "OpenAPI", "Swagger" ]
+dependencies = [
+    "PyYAML>=5.4",
+]
+
+[project.entry-points."ckan.plugins"]
+openapidocs = "ckanext.openapidocs.plugin:OpenAPIDocsPlugin"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+        "ignore::sqlalchemy.exc.SADeprecationWarning",
+        "ignore::sqlalchemy.exc.SAWarning",
+        "ignore::DeprecationWarning",
+]

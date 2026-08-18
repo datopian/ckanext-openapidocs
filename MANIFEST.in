@@ -1,0 +1,4 @@
+include README.md
+recursive-include ckanext/openapidocs *.yaml
+recursive-include ckanext/openapidocs/templates *.html
+recursive-include ckanext/openapidocs/public *
