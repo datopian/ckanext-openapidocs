@@ -18,6 +18,31 @@ from ckanext.openapidocs import config as docs_config
 
 log = logging.getLogger(__name__)
 
+# The Action API version the running CKAN serves. CKAN defines it as the
+# default of the `/api/<ver>/action/<name>` route, so reading it from there
+# keeps the documented paths pointing at the routes that actually exist
+# rather than at a number hardcoded here.
+_FALLBACK_API_VERSION = "3"
+
+
+def api_version():
+    """The Action API version of the running CKAN, as an int.
+
+    Falls back to 3 when the constant has moved, which is what every CKAN 2.x
+    serves; a wrong-but-current guess documents working paths, while raising
+    would take the whole docs page down over a cosmetic number.
+    """
+    try:
+        from ckan.views.api import API_DEFAULT_VERSION
+        return int(API_DEFAULT_VERSION)
+    except (ImportError, TypeError, ValueError):
+        log.warning(
+            "Could not read CKAN's API version; assuming %s",
+            _FALLBACK_API_VERSION,
+        )
+        return _FALLBACK_API_VERSION
+
+
 _PARAM_RE = re.compile(r"^:param (?P<name>[\w.-]+):\s*(?P<desc>.*)$")
 _TYPE_RE = re.compile(r"^:type (?P<name>[\w.-]+):\s*(?P<type>.*)$")
 _FIELD_RE = re.compile(r"^:[a-zA-Z]+ ?[\w.-]*:")
@@ -490,6 +515,7 @@ def build_spec(overrides=None):
     if overrides is None:
         overrides = docs_config.load_config()
     action_overrides = overrides.get("actions") or {}
+    version = api_version()
     core = _core_actions()
     (
         scheming_dataset_props,
@@ -581,13 +607,17 @@ def build_spec(overrides=None):
             }
         else:
             operations = {"post": post_operation}
-        paths[f"/api/3/action/{name}"] = operations
+        paths[f"/api/{version}/action/{name}"] = operations
 
     info = {
         "title": "CKAN Action API",
-        "version": "3",
+        "version": str(version),
     }
     info.update(overrides.get("info") or {})
+    # Swagger UI prints "1.0" when info.version is missing or empty, so a
+    # layer that clears it must not win over the detected value.
+    if not str(info.get("version") or "").strip():
+        info["version"] = str(version)
 
     tag_descriptions = overrides.get("tags") or {}
     used_tags = {
